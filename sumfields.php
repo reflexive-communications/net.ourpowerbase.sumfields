@@ -1329,6 +1329,17 @@ function sumfields_gen_data(&$returnValues) {
       }
     }
   }
+
+  // Timeout previous run
+  // if it's still running after 20 hours -> assume it failed
+  if ($status_name == 'running' || $status_name == 'failed') {
+    $ts_last_run = strtotime($status_date);
+    $ts_now = strtotime($date);
+    if ($ts_now - $ts_last_run > 20 * 60 * 60) {
+      $status_name = 'scheduled';
+    }
+  }
+
   if ($status_name == 'scheduled') {
 
     $new_status = 'running:' . $date;
@@ -1365,7 +1376,7 @@ function sumfields_gen_data(&$returnValues) {
       }
       else {
         $date = date('Y-m-d H:i:s');
-        $new_status = 'fail:' . $date;
+        $new_status = 'failed:' . $date;
         $exception = TRUE;
       }
     }
@@ -1430,4 +1441,3 @@ function sumfields_civicrm_alterLogTables(&$logTableSpec) {
     unset($logTableSpec[$tableName]);
   }
 }
-
